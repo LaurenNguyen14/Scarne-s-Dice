@@ -25,8 +25,8 @@
         android:layout_alignTop="@+id/rollButton"
         android:layout_alignParentEnd="true"
         android:layout_centerHorizontal="false"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="153dp"
+        android:layout_marginTop="-1dp"
+        android:layout_marginEnd="155dp"
         android:text="I'm good" />
 
     <Button
@@ -80,5 +80,18 @@
         android:layout_marginStart="151dp"
         android:layout_marginBottom="-1dp"
         android:text="Turn Score: 0" />
+
+    <TextView
+        android:id="@+id/userWin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="-241dp"
+        android:layout_marginBottom="79dp"
+        android:layout_toStartOf="@+id/holdButton"
+        android:fontFamily="serif-monospace"
+        android:text="YOU WIN"
+        android:textAlignment="center"
+        android:textSize="36sp" />
 
 </RelativeLayout>

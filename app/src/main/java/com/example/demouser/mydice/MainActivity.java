@@ -3,9 +3,13 @@ package com.example.demouser.mydice;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.TestLooperManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView yourScoreView;
     private TextView turnScoreView;
     private TextView computerScoreView;
+    private TextView userWin;
 
     private ImageView dice;
 
@@ -28,11 +33,14 @@ public class MainActivity extends AppCompatActivity {
     private int computerScore;
 
     private boolean userTurn;
-
+    private Handler handler;
 
     private Button rollButton;
     private Button holdButton;
     private Button resetButton;
+
+
+    private Animation zoom;
 
     private Random random = new Random();
 
@@ -43,9 +51,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        zoom = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.zoom);
+
         yourScoreView = findViewById(R.id.yourScore);
         turnScoreView = findViewById(R.id.turnScore);
         computerScoreView = findViewById(R.id.computerScore);
+        userWin = findViewById(R.id.userWin);
+        userWin.setVisibility(View.INVISIBLE);
 
         dice = findViewById(R.id.dice);
 
@@ -54,8 +66,7 @@ public class MainActivity extends AppCompatActivity {
         holdButton = findViewById(R.id.holdButton);
         resetButton = findViewById(R.id.newGame);
 
-
-
+        handler = new Handler();
 
         rollButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -77,6 +88,12 @@ public class MainActivity extends AppCompatActivity {
                 userTurn=true;
                 updateView();
 
+                holdButton.setEnabled(true);
+                resetButton.setEnabled(true);
+                rollButton.setEnabled(true);
+
+                userWin.setVisibility(View.INVISIBLE);
+
             }
         });
 
@@ -91,8 +108,35 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
     }
 
+    private Runnable computerRoll = new Runnable() {
+        @Override
+        public void run() {
+            if(turnScore<20 && !userTurn){
+                roll();
+                handler.postDelayed(this, 500);
+            }
+            else {
+                computerScore += turnScore;
+                turnScore = 0;
+                updateView();
+
+                if(!gameOver()) {
+                    userTurn = true;
+
+                    //enable all buttons for user turn
+                    rollButton.setEnabled(true);
+                    resetButton.setEnabled(true);
+                    holdButton.setEnabled(true);
+                }
+
+                resetButton.setEnabled(true);
+            }
+            updateView();
+        }
+    };
 
     private void roll(){
         int i = random.nextInt(6);
@@ -100,16 +144,22 @@ public class MainActivity extends AppCompatActivity {
 
         if(i !=0){
             turnScore += i + 1;
+            gameOver();
         }
         else{
             turnScore=0;
             if(userTurn) {
                 userTurn = false;
+                computerTurn();
             }
             else{
                 userTurn=true;
             }
         }
+
+        dice.startAnimation(zoom);
+
+
     }
 
     private void updateView(){
@@ -123,6 +173,40 @@ public class MainActivity extends AppCompatActivity {
         yourScoreView.setText("Your Score: " + userScore);
         turnScoreView.setText("Turn Score: " +turnScore);
         userTurn=false;
+        if(!gameOver())
+            computerTurn();
     }
 
+    private void computerTurn(){
+        holdButton.setEnabled(false);
+        resetButton.setEnabled(false);
+        rollButton.setEnabled(false);
+        handler.postDelayed(computerRoll,500);
+
+    }
+    private boolean gameOver(){
+
+        if(userScore >= 100){
+            rollButton.setEnabled(false);
+            holdButton.setEnabled(false);
+            userWin.setText("YOU WIN");
+            userWin.setVisibility(View.VISIBLE);
+
+            return true;
+        }
+        else if(computerScore>= 100){
+            rollButton.setEnabled(false);
+            holdButton.setEnabled(false);
+
+            userWin.setText("COMPUTER WINS");
+            userWin.setVisibility(View.VISIBLE);
+
+            return true;
+        }
+
+        return false;
+    }
+
+
 }
+
